@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:advance_pdf_viewer/src/zoomable_widget.dart';
+import 'package:advance_pdf_viewer2/src/zoomable_widget.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
 
