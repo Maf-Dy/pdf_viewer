@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.5+1
+* minor changes 
+
+## 2.0.5
+* Adding MacOS support ( under testing )
+
 ## 2.0.2
 * Bugfix crashing
 
