@@ -26,6 +26,7 @@ class PDFDocument {
   static Future<PDFDocument> fromFile(dynamic file) async {
 
     if (kIsWeb) {
+      file as List<int>;
       return fromFileWeb(file);
     } else {
       file as File;

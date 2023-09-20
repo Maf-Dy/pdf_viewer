@@ -7,12 +7,15 @@ import 'package:pdfx/pdfx.dart';
 
 import 'dart:html' as html;
 
-Future<PDFDocument> fromFileWeb(dynamic file) async {
-  file as html.File;
+Future<PDFDocument> fromFileWeb(dynamic fileBytes) async {
+  html.Blob b = html.Blob([fileBytes]);
+  String url = html.Url.createObjectUrlFromBlob(b);
+
+  //file as html.File;
   final document = PDFDocument();
-  document.filePathPublic = file.relativePath;
+  document.filePathPublic = url;
   try {
-    PdfDocument testdoc = await PdfDocument.openFile(file.relativePath ?? '');
+    PdfDocument testdoc = await PdfDocument.openData(fileBytes as FutureOr<Uint8List>);
 
 // final result = await context.callMethod('getNumberOfPages', [file.relativePath]);
 //  final pageCount = result['pageCount'] as String;
@@ -25,22 +28,21 @@ Future<PDFDocument> fromFileWeb(dynamic file) async {
   return document;
 }
 
-
 Future<PDFDocument> fromAssetWeb(String asset) async {
-final document = PDFDocument();
-try {
+  final document = PDFDocument();
+  try {
 // Load the asset data.
-final data = await rootBundle.load(asset);
-final bytes = data.buffer.asUint8List();
+    final data = await rootBundle.load(asset);
+    final bytes = data.buffer.asUint8List();
 
 // Create a Blob from the asset data.
-final blob = html.Blob([Uint8List.fromList(bytes)]);
+    final blob = html.Blob([Uint8List.fromList(bytes)]);
 
 // Get the URL of the Blob.
-final url = html.Url.createObjectUrlFromBlob(blob);
+    final url = html.Url.createObjectUrlFromBlob(blob);
 
-PdfDocument testdoc = await PdfDocument.openAsset(asset);
-final result = testdoc.pagesCount;
+    PdfDocument testdoc = await PdfDocument.openAsset(asset);
+    final result = testdoc.pagesCount;
 
 // Call the JavaScript function 'getNumberOfPages' with the URL.
 // final result = context.callMethod('getNumberOfPages', [url]);
@@ -49,23 +51,23 @@ final result = testdoc.pagesCount;
 //html.Url.revokeObjectUrl(url);
 
 // Process 'result' as needed to extract information from JavaScript.
-final pageCount = result;
+    final pageCount = result;
 
-document.filePathPublic = asset;
+    document.filePathPublic = asset;
 
-document.count = pageCount;
-} catch (e) {
-throw Exception('Error reading PDF!');
+    document.count = pageCount;
+  } catch (e) {
+    throw Exception('Error reading PDF!');
+  }
+  return document;
 }
-return document;
-}
 
-
-Future<String> getPageWeb(int page,String filePathPublic) async {
-  var bytes = await getUint8ListFromBlobUrl(filePathPublic??'');
+Future<String> getPageWeb(int page, String filePathPublic) async {
+  var bytes = await getUint8ListFromBlobUrl(filePathPublic ?? '');
   PdfDocument testdoc = await PdfDocument.openData(bytes);
   PdfPage pagee = await testdoc.getPage(page);
-  PdfPageImage? pageImage = await pagee.render(width: pagee.width, height: pagee.height,format: PdfPageImageFormat.png);
+  PdfPageImage? pageImage = await pagee.render(
+      width: pagee.width, height: pagee.height, format: PdfPageImageFormat.png);
 
   final blob = html.Blob([pageImage?.bytes]);
 
