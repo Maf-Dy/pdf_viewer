@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:advance_pdf_viewer2/src/zoomable_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/painting.dart';
 
 /// A class to represent PDF page
 /// [imgPath], path of the image (pdf page)
@@ -19,15 +19,16 @@ class PDFPage extends StatefulWidget {
   final double minScale;
   final double maxScale;
   final double panLimit;
+
   const PDFPage(
-    this.imgPath,
-    this.num, {
-    this.onZoomChanged,
-    this.zoomSteps = 3,
-    this.minScale = 1.0,
-    this.maxScale = 5.0,
-    this.panLimit = 1.0,
-  });
+      this.imgPath,
+      this.num, {
+        this.onZoomChanged,
+        this.zoomSteps = 3,
+        this.minScale = 1.0,
+        this.maxScale = 5.0,
+        this.panLimit = 1.0,
+      });
 
   @override
   _PDFPageState createState() => _PDFPageState();
@@ -39,15 +40,28 @@ class _PDFPageState extends State<PDFPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _repaint();
+    kIsWeb ? _repaint_web() : _repaint();
   }
 
   @override
   void didUpdateWidget(PDFPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.imgPath != widget.imgPath) {
-      _repaint();
+      kIsWeb ? _repaint_web() : _repaint();
     }
+  }
+
+  void _repaint_web() {
+
+    provider = NetworkImage(widget.imgPath!);
+    final resolver = provider.resolve(createLocalImageConfiguration(context));
+    resolver.addListener(
+      ImageStreamListener(
+            (imgInfo, alreadyPainted) {
+          if (!alreadyPainted && mounted) setState(() {});
+        },
+      ),
+    );
   }
 
   void _repaint() {
@@ -55,7 +69,7 @@ class _PDFPageState extends State<PDFPage> {
     final resolver = provider.resolve(createLocalImageConfiguration(context));
     resolver.addListener(
       ImageStreamListener(
-        (imgInfo, alreadyPainted) {
+            (imgInfo, alreadyPainted) {
           if (!alreadyPainted && mounted) setState(() {});
         },
       ),
